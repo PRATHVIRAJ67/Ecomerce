@@ -1,0 +1,25 @@
+{
+  "name": "uru-website",
+  "version": "0.1.0",
+  "private": true,
+  "description": "URU customer website (React + Vite + Tailwind) on Cloudflare",
+  "workspaces": [
+    "Shared",
+    "Website/Frontend"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @ecommerce/website",
+    "build": "npm run build -w @ecommerce/website",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "deploy": "npm run build && cd Website/Frontend && npx --yes wrangler@4 deploy",
+    "db:migrate": "node Database/scripts/migrate.mjs",
+    "db:seed": "node Database/scripts/migrate.mjs --seed"
+  },
+  "devDependencies": {
+    "dotenv": "^17.0.0",
+    "pg": "^8.16.3"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}
