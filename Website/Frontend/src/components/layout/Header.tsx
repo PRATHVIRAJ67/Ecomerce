@@ -1,4 +1,4 @@
-import { ChevronRight, Heart, LogOut, Menu, Package, Search, ShoppingBag, User, X } from 'lucide-react';
+import { ChevronRight, Heart, LogOut, Menu, Package, Search, ShoppingBag, Smartphone, User, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -81,6 +81,9 @@ export function Header() {
             <button type="button" className="inline-flex size-10 items-center justify-center rounded-full hover:bg-forest-100 md:hidden" onClick={() => setSearchOpen((v) => !v)} aria-label="Search" aria-expanded={searchOpen}>
               {searchOpen ? <X className="size-5 text-forest-800" aria-hidden /> : <Search className="size-5 text-forest-800" aria-hidden />}
             </button>
+            <Link to="/app" className="hidden h-10 items-center gap-2 rounded-full px-3 text-sm font-medium text-terracotta-600 hover:bg-terracotta-50 xl:inline-flex">
+              <Smartphone className="size-5" aria-hidden /> Get the app
+            </Link>
             <Link to="/track-order" className="hidden h-10 items-center gap-2 rounded-full px-3 text-sm font-medium text-forest-800 hover:bg-forest-100 xl:inline-flex">
               <Package className="size-5" aria-hidden /> Track order
             </Link>
@@ -162,6 +165,7 @@ export function Header() {
           </ul>
           <ul className="space-y-1 text-[15px]">
             {[
+              ['/app', 'Get the Android app'],
               ['/track-order', 'Track your order'],
               ['/about', 'Our story'],
               ['/faq', 'FAQs'],

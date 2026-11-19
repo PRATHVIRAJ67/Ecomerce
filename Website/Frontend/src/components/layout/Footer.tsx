@@ -69,6 +69,7 @@ export function Footer() {
         <FooterCol
           title="Help"
           links={[
+            { to: '/app', label: 'Get the Android app' },
             { to: '/track-order', label: 'Track your order' },
             { to: '/account/orders', label: 'Your orders' },
             { to: '/faq', label: 'FAQs' },

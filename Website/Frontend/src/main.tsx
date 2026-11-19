@@ -25,6 +25,7 @@ const WishlistPage = lazy(() => import('./pages/WishlistPage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const OrderConfirmationPage = lazy(() => import('./pages/OrderConfirmationPage'));
 const TrackOrderPage = lazy(() => import('./pages/TrackOrderPage'));
+const AppPage = lazy(() => import('./pages/AppPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const AccountLayout = lazy(() => import('./pages/account/AccountLayout'));
 const ProfilePage = lazy(() => import('./pages/account/ProfilePage'));
@@ -94,6 +95,7 @@ const router = createBrowserRouter([
           { path: 'checkout', element: <RequireAuth><CheckoutPage /></RequireAuth> },
           { path: 'order/:id/confirmed', element: <RequireAuth><OrderConfirmationPage /></RequireAuth> },
           { path: 'track-order', element: <TrackOrderPage /> },
+          { path: 'app', element: <AppPage /> },
           {
             path: 'account',
             element: <AccountLayout />,

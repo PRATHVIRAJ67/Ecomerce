@@ -111,11 +111,11 @@ export function Hero({ banners, loading, tagline }: { banners: Banner[]; loading
             <BannerLink href={b.link_url} className="block">
               <picture>
                 {b.mobile_image_url && <source media="(max-width: 640px)" srcSet={b.mobile_image_url} />}
-                <img src={b.image_url} alt="" className="h-[440px] w-full object-cover sm:h-[520px]" loading={i === 0 ? 'eager' : 'lazy'} fetchPriority={i === 0 ? 'high' : undefined} />
+                <img src={b.image_url} alt="" className={cn('h-[440px] w-full object-cover sm:h-[520px]', i === index && 'animate-kenburns')} loading={i === 0 ? 'eager' : 'lazy'} fetchPriority={i === 0 ? 'high' : undefined} />
               </picture>
               <div className="absolute inset-0 bg-gradient-to-r from-forest-900/85 via-forest-900/45 to-transparent" />
               <div className="absolute inset-0 flex items-end sm:items-center">
-                <div className="max-w-xl px-6 pb-16 sm:px-14 sm:pb-0">
+                <div key={i === index ? `on-${b.id}` : b.id} className={cn('max-w-xl px-6 pb-16 sm:px-14 sm:pb-0', i === index && 'animate-fade-up')}>
                   {i === 0 ? (
                     <h1 className="font-display text-4xl leading-tight font-semibold text-cream sm:text-6xl">{b.title}</h1>
                   ) : (

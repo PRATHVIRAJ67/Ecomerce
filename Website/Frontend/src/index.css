@@ -49,6 +49,12 @@
   --animate-slide-in: slide-in 0.28s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   --animate-slide-in-left: slide-in-left 0.28s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 
+  /* Slow cinematic zoom on the active hero slide (disabled by prefers-reduced-motion below). */
+  --animate-kenburns: kenburns 9s ease-out forwards;
+  @keyframes kenburns {
+    from { transform: scale(1); }
+    to { transform: scale(1.09); }
+  }
   @keyframes shimmer {
     0% { background-position: -400px 0; }
     100% { background-position: 400px 0; }
