@@ -15,7 +15,7 @@ img(slug, file, alt, sort_order) as (values
   ('malabar-black-pepper',       'pepper',      'Close-up of black peppercorns',               1),
   ('udupi-sambar-powder',        'sambar',      'Sambar masala in a brass bowl with spices',   0),
   ('udupi-sambar-powder',        'spices3',     'Spoons of ground spices',                     1),
-  ('appe-midi-pickle',           'mangopickle', 'Tender raw mangoes on the tree',              0),
+  ('appe-midi-pickle',           'mangopickle-v2', 'Tender raw mangoes on the tree',              0),
   ('lemon-ginger-pickle',        'lemonpickle', 'Lemons in a glass jar',                       0),
   ('kodubale-rings',             'snack2',      'Crunchy golden snacks',                       0),
   ('dharwad-peda',               'peda',        'Traditional Indian milk sweets',              0),
@@ -48,12 +48,11 @@ from (values
 ) as v(slug, file)
 where c.slug = v.slug and c.image_url is null;
 
--- Home banners (only added once; edit or switch off from Admin → Banners)
+-- Home promo banners (only added once; edit or switch off from Admin → Banners).
+-- No home_hero photo banners: the storefront shows its illustrated village hero unless the merchant adds one.
 insert into public.banners (title, subtitle, image_url, cta_label, link_url, placement, sort_order)
 select v.title, v.subtitle, 'https://uru-store.prathviholla67.workers.dev/media/demo/' || v.file || '.jpg', v.cta, v.link, v.placement, v.sort_order
 from (values
-  ('Spices, stone-ground the old way', 'Byadgi chilli, Malabar pepper and family masalas from small farms.', 'banner-spices-goa', 'Shop spices', '/category/spices-masalas', 'home_hero', 1),
-  ('From the village, to your door', 'Seasonal produce and heirloom staples, packed fresh.', 'banner-village', 'Explore the store', '/shop', 'home_hero', 2),
   ('Handmade by village potters', 'Clay cookware and terracotta, shaped by hand.', 'banner-pots', 'Shop home & kitchen', '/category/home-kitchen', 'home_strip', 1),
   ('Alphonso season is here', 'Naturally ripened Ratnagiri Alphonso, no carbide.', 'mango', 'Order mangoes', '/product/alphonso-mangoes', 'home_strip', 2)
 ) as v(title, subtitle, file, cta, link, placement, sort_order)
