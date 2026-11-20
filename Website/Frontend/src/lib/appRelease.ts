@@ -3,14 +3,14 @@
  * Updated on every APK release (see Mobile/Frontend/TODO.md → "Release an APK").
  */
 export const ANDROID_RELEASE = {
-  version: '1.0.0',
-  versionCode: 1,
+  version: '1.0.1',
+  versionCode: 2,
   /** Versioned, immutable file name. */
-  file: 'uru-android-1.0.0.apk',
+  file: 'uru-android-1.0.1.apk',
   /** Always points at the newest release. */
   latest: 'uru-android.apk',
-  sizeBytes: 112769764,
-  sha256: '608f9ed9a3977a980539468baf5f221de1f1e77825eb749763306adf6ae6b815',
+  sizeBytes: 112772984,
+  sha256: '9af77621ceab662ad709b8b6bee364e6262d09de20ca6b2e5406951aa8cd2107',
   releasedAt: '2026-11-20',
   minAndroid: 'Android 7.0 or later',
 } as const;
