@@ -25,7 +25,7 @@ export default function HomePage() {
           potentialAction: { '@type': 'SearchAction', target: `${absoluteUrl('/shop')}?q={search_term_string}`, 'query-input': 'required name=search_term_string' },
         }}
       />
-      <Hero banners={heroBanners} loading={isPending} tagline={data?.settings.store_tagline} />
+      <Hero banners={heroBanners} loading={isPending} tagline={data?.settings.store_tagline} categories={data?.categories} />
 
       {error ? (
         <div className="container-page py-16">

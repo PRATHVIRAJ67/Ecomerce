@@ -1,4 +1,4 @@
-import type { Banner } from '@ecommerce/shared';
+import type { Banner, Category } from '@ecommerce/shared';
 import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -7,17 +7,18 @@ import { ButtonLink, Skeleton } from '../ui';
 
 const isExternal = (url: string) => /^https?:\/\//i.test(url);
 
-function BannerLink({ href, className, children }: { href: string | null; className?: string; children: React.ReactNode }) {
+function BannerLink({ href, className, children, tabIndex, ariaHidden }: { href: string | null; className?: string; children: React.ReactNode; tabIndex?: number; ariaHidden?: boolean }) {
+  const a11y = { tabIndex, 'aria-hidden': ariaHidden || undefined };
   if (!href) return <span className={className}>{children}</span>;
   if (isExternal(href)) {
     return (
-      <a href={href} className={className} rel="noopener">
+      <a href={href} className={className} rel="noopener" {...a11y}>
         {children}
       </a>
     );
   }
   return (
-    <Link to={href} className={className}>
+    <Link to={href} className={className} {...a11y}>
       {children}
     </Link>
   );
@@ -71,7 +72,36 @@ function BrandHero({ tagline }: { tagline?: string }) {
   );
 }
 
-export function Hero({ banners, loading, tagline }: { banners: Banner[]; loading?: boolean; tagline?: string }) {
+const pad2 = (n: number) => String(n).padStart(2, '0');
+
+/** Keeps hyphenated words together ("stone-ground"), so a headline never breaks at the hyphen. */
+function NoHyphenBreak({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(/(\s+)/).map((part, i) =>
+        part.includes('-') ? (
+          <span key={i} className="whitespace-nowrap">
+            {part}
+          </span>
+        ) : (
+          part
+        ),
+      )}
+    </>
+  );
+}
+
+/** Small label above the headline, derived from where the banner links (real category name when possible). */
+function eyebrowFor(link: string | null, categories: Category[]): string | null {
+  if (!link) return null;
+  const slug = link.match(/^\/category\/([^/?#]+)/)?.[1];
+  if (slug) return categories.find((c) => c.slug === slug)?.name ?? null;
+  if (link.startsWith('/product/')) return 'Featured';
+  if (link === '/shop' || link.startsWith('/shop?')) return 'All categories';
+  return null;
+}
+
+export function Hero({ banners, loading, tagline, categories = [] }: { banners: Banner[]; loading?: boolean; tagline?: string; categories?: Category[] }) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false); // hover / focus / pause button
   const [holding, setHolding] = useState(false); // touch-and-hold on phones
@@ -88,13 +118,14 @@ export function Hero({ banners, loading, tagline }: { banners: Banner[]; loading
   if (loading) {
     return (
       <div className="container-page pt-3 sm:pt-6">
-        <Skeleton className="h-[500px] rounded-[1.75rem] sm:h-[520px] sm:rounded-[2rem]" />
+        <Skeleton className="h-[540px] rounded-[1.75rem] sm:h-[600px] sm:rounded-[2rem] lg:h-[460px]" />
       </div>
     );
   }
   if (!count) return <BrandHero tagline={tagline} />;
 
   const go = (i: number) => setIndex(((i % count) + count) % count);
+  const navButton = 'flex size-9 items-center justify-center rounded-full border border-cream/25 text-cream transition hover:border-cream/60 hover:bg-white/10';
 
   return (
     <section className="container-page pt-3 sm:pt-6" aria-roledescription="carousel" aria-label="Featured offers">
@@ -127,6 +158,7 @@ export function Hero({ banners, loading, tagline }: { banners: Banner[]; loading
         {banners.map((b, i) => {
           const active = i === index;
           const Heading = i === 0 ? 'h1' : 'h2';
+          const eyebrow = eyebrowFor(b.link_url, categories);
           return (
             <div
               key={b.id}
@@ -135,49 +167,62 @@ export function Hero({ banners, loading, tagline }: { banners: Banner[]; loading
               aria-label={`${i + 1} of ${count}: ${b.title}`}
               aria-hidden={!active}
               inert={!active}
-              className={cn('transition-opacity duration-700', active ? 'relative opacity-100' : 'pointer-events-none absolute inset-0 opacity-0')}
+              className={cn(
+                'grid transition-opacity duration-700 lg:min-h-[460px] lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]',
+                active ? 'relative opacity-100' : 'pointer-events-none absolute inset-0 opacity-0',
+              )}
             >
-              <BannerLink href={b.link_url} className="block">
+              {/* Photo in full colour — no tint over the subject. Top on phones, right on desktop. */}
+              <BannerLink href={b.link_url} tabIndex={-1} ariaHidden className="relative block h-[220px] overflow-hidden sm:h-[300px] lg:order-2 lg:h-auto">
                 <picture>
                   {b.mobile_image_url && <source media="(max-width: 640px)" srcSet={b.mobile_image_url} />}
                   <img
                     src={b.image_url}
                     alt=""
-                    className={cn('h-[500px] w-full object-cover sm:h-[520px]', active && 'animate-kenburns')}
+                    className={cn('absolute inset-0 size-full object-cover', active && 'animate-kenburns')}
                     loading={i === 0 ? 'eager' : 'lazy'}
                     fetchPriority={i === 0 ? 'high' : undefined}
                     draggable={false}
                   />
                 </picture>
-                {/* Phones: clear photo on top, readable fade at the bottom. Desktop: fade from the left. */}
-                <div className="absolute inset-0 bg-[linear-gradient(to_top,rgb(10_42_29/0.96)_0%,rgb(10_42_29/0.78)_32%,rgb(10_42_29/0.12)_62%,rgb(10_42_29/0.28)_100%)] sm:hidden" />
-                <div className="absolute inset-0 hidden bg-gradient-to-r from-forest-900/85 via-forest-900/45 to-transparent sm:block" />
-                <div className="absolute inset-0 flex items-end sm:items-center">
-                  <div key={active ? `on-${b.id}` : b.id} className={cn('w-full px-6 pb-7 sm:max-w-xl sm:px-14 sm:pb-0', active && 'animate-fade-up')}>
-                    <Heading className="font-display text-[2rem] leading-[1.08] font-semibold tracking-tight text-cream sm:text-6xl sm:leading-tight">{b.title}</Heading>
-                    {b.subtitle && <p className="mt-3 line-clamp-2 text-[15px] leading-snug text-cream/85 sm:mt-4 sm:line-clamp-none sm:text-lg">{b.subtitle}</p>}
-                    {b.link_url && (
-                      <span className="mt-5 inline-flex h-11 items-center gap-2 rounded-2xl bg-terracotta-500 px-5 text-[15px] font-semibold text-white shadow-lift sm:mt-7 sm:h-12 sm:px-6 sm:text-base">
-                        {b.cta_label || 'Shop now'} <ArrowRight className="size-5" aria-hidden />
-                      </span>
-                    )}
-                  </div>
-                </div>
+                {/* Soft blend into the panel: bottom edge on phones, left edge on desktop. */}
+                <span className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-forest-800 to-transparent lg:inset-x-auto lg:inset-y-0 lg:left-0 lg:h-auto lg:w-28 lg:bg-gradient-to-r" aria-hidden />
               </BannerLink>
+
+              {/* Copy on a solid brand panel — always legible, never fighting the photo. */}
+              <div className="relative flex min-h-[290px] flex-col justify-center px-6 pt-2 pb-16 sm:min-h-[300px] sm:px-10 sm:pb-20 lg:min-h-0 lg:px-14 lg:pt-14 lg:pb-24">
+                <div className="pattern-weave pointer-events-none absolute inset-0 opacity-60" aria-hidden />
+                <div key={active ? `on-${b.id}` : b.id} className={cn('relative', active && 'animate-fade-up')}>
+                  {eyebrow && <p className="mb-3 text-[11px] font-semibold tracking-[0.22em] text-terracotta-200 uppercase sm:text-xs">{eyebrow}</p>}
+                  <Heading className="font-display text-[1.9rem] leading-[1.1] font-semibold tracking-tight text-balance text-cream sm:text-[2.6rem] lg:text-[3.1rem] lg:leading-[1.06]">
+                    <NoHyphenBreak text={b.title} />
+                  </Heading>
+                  {b.subtitle && <p className="mt-3 line-clamp-2 max-w-md text-[15px] leading-relaxed text-cream/75 sm:mt-4 sm:line-clamp-none sm:text-[17px]">{b.subtitle}</p>}
+                  {b.link_url && (
+                    <BannerLink
+                      href={b.link_url}
+                      className="mt-6 inline-flex h-12 items-center gap-2 rounded-2xl bg-terracotta-500 px-6 text-[15px] font-semibold text-white shadow-lift transition hover:bg-terracotta-600 sm:mt-8"
+                    >
+                      {b.cta_label || 'Shop now'} <ArrowRight className="size-5" aria-hidden />
+                    </BannerLink>
+                  )}
+                </div>
+              </div>
             </div>
           );
         })}
 
         {count > 1 && (
-          <>
-            {/* Story-style progress: fills while a slide plays; tap a segment to jump to it. */}
-            <div className="absolute inset-x-4 top-2 z-10 flex gap-1.5 sm:inset-x-auto sm:top-auto sm:right-[8.5rem] sm:bottom-[1.6rem] sm:w-40">
+          // Lives on the panel (not over the photo): "01 ━━ 02" story-style progress + controls.
+          <div className="absolute inset-x-6 bottom-5 z-10 flex items-center gap-3 sm:inset-x-10 sm:bottom-7 lg:right-[calc(54%+3.5rem)] lg:bottom-10 lg:left-14">
+            <span className="text-xs font-semibold text-cream tabular">{pad2(index + 1)}</span>
+            <div className="flex flex-1 gap-1.5">
               {banners.map((b, i) => (
                 <button key={b.id} type="button" onClick={() => go(i)} aria-label={`Go to slide ${i + 1}`} aria-current={i === index} className="flex-1 py-2.5">
-                  <span className="block h-[3px] overflow-hidden rounded-full bg-white/30">
+                  <span className="block h-[3px] overflow-hidden rounded-full bg-white/20">
                     <span
                       key={i === index ? `fill-${index}` : b.id}
-                      className={cn('block h-full origin-left rounded-full bg-cream', i < index ? 'scale-x-100' : i > index ? 'scale-x-0' : reducedMotion ? 'scale-x-100' : 'animate-hero-progress')}
+                      className={cn('block h-full origin-left rounded-full bg-terracotta-300', i < index ? 'scale-x-100' : i > index ? 'scale-x-0' : reducedMotion ? 'scale-x-100' : 'animate-hero-progress')}
                       style={i === index && !reducedMotion ? { animationPlayState: stopped ? 'paused' : 'running' } : undefined}
                       onAnimationEnd={i === index && !reducedMotion ? () => go(index + 1) : undefined}
                     />
@@ -185,22 +230,21 @@ export function Hero({ banners, loading, tagline }: { banners: Banner[]; loading
                 </button>
               ))}
             </div>
-
-            {/* Desktop controls (phones swipe, and touch-and-hold to pause). */}
-            <div className="absolute right-8 bottom-8 hidden items-center gap-2 sm:flex">
+            <span className="text-xs font-semibold text-cream/45 tabular">{pad2(count)}</span>
+            <div className="ml-1 hidden items-center gap-2 sm:flex">
               {!reducedMotion && (
-                <button type="button" onClick={() => setPaused((p) => !p)} className="flex size-9 items-center justify-center rounded-full bg-white/15 text-cream backdrop-blur hover:bg-white/25" aria-label={paused ? 'Play slideshow' : 'Pause slideshow'}>
+                <button type="button" onClick={() => setPaused((p) => !p)} className={navButton} aria-label={paused ? 'Play slideshow' : 'Pause slideshow'}>
                   {paused ? <Play className="size-4" aria-hidden /> : <Pause className="size-4" aria-hidden />}
                 </button>
               )}
-              <button type="button" onClick={() => go(index - 1)} className="flex size-9 items-center justify-center rounded-full bg-white/15 text-cream backdrop-blur hover:bg-white/25" aria-label="Previous slide">
+              <button type="button" onClick={() => go(index - 1)} className={navButton} aria-label="Previous slide">
                 <ChevronLeft className="size-5" aria-hidden />
               </button>
-              <button type="button" onClick={() => go(index + 1)} className="flex size-9 items-center justify-center rounded-full bg-white/15 text-cream backdrop-blur hover:bg-white/25" aria-label="Next slide">
+              <button type="button" onClick={() => go(index + 1)} className={navButton} aria-label="Next slide">
                 <ChevronRight className="size-5" aria-hidden />
               </button>
             </div>
-          </>
+          </div>
         )}
       </div>
     </section>
