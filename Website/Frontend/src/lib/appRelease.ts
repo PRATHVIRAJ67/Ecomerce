@@ -9,8 +9,8 @@ export const ANDROID_RELEASE = {
   file: 'uru-android-1.0.0.apk',
   /** Always points at the newest release. */
   latest: 'uru-android.apk',
-  sizeBytes: 0,
-  sha256: '',
+  sizeBytes: 112769764,
+  sha256: '608f9ed9a3977a980539468baf5f221de1f1e77825eb749763306adf6ae6b815',
   releasedAt: '2026-11-20',
   minAndroid: 'Android 7.0 or later',
 } as const;
