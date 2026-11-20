@@ -1,7 +1,6 @@
 import { ArrowRight, HeartHandshake, Leaf, Tractor } from 'lucide-react';
 import { CategoryTiles } from '../components/home/CategoryTiles';
 import { Hero, StripBanners } from '../components/home/Hero';
-import { OriginsMarquee, originTowns, VillageHero, VillageHeroSkeleton } from '../components/home/VillageHero';
 import { ProductGrid } from '../components/product/ProductCard';
 import { ProductRail } from '../components/product/ProductRail';
 import { ButtonLink, ErrorState, SectionHeading } from '../components/ui';
@@ -13,9 +12,6 @@ export default function HomePage() {
 
   const heroBanners = (data?.banners ?? []).filter((b) => b.placement === 'home_hero');
   const stripBanners = (data?.banners ?? []).filter((b) => b.placement === 'home_strip');
-  // Real products (best sellers first) feed the hero's product cards and the origins strip.
-  const heroProducts = data ? [...data.best_sellers, ...data.featured, ...data.trending, ...data.new_arrivals] : [];
-  const origins = originTowns(heroProducts);
 
   return (
     <>
@@ -29,14 +25,7 @@ export default function HomePage() {
           potentialAction: { '@type': 'SearchAction', target: `${absoluteUrl('/shop')}?q={search_term_string}`, 'query-input': 'required name=search_term_string' },
         }}
       />
-      {isPending ? (
-        <VillageHeroSkeleton />
-      ) : heroBanners.length > 0 ? (
-        <Hero banners={heroBanners} />
-      ) : (
-        <VillageHero products={heroProducts} origins={origins} settings={data?.settings} />
-      )}
-      {!isPending && <OriginsMarquee origins={origins} />}
+      <Hero banners={heroBanners} loading={isPending} tagline={data?.settings.store_tagline} />
 
       {error ? (
         <div className="container-page py-16">

@@ -3,6 +3,7 @@ import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '../../lib/format';
+import { ButtonLink, Skeleton } from '../ui';
 
 const isExternal = (url: string) => /^https?:\/\//i.test(url);
 
@@ -22,8 +23,55 @@ function BannerLink({ href, className, children }: { href: string | null; classN
   );
 }
 
-/** Photo carousel for merchant-scheduled home_hero banners (Admin → Banners). */
-export function Hero({ banners }: { banners: Banner[] }) {
+/** Brand hero used when the merchant hasn't scheduled any home banners yet. */
+function BrandHero({ tagline }: { tagline?: string }) {
+  return (
+    <section className="container-page pt-4 sm:pt-6">
+      <div className="relative isolate overflow-hidden rounded-[2rem] bg-forest-700 text-cream">
+        <div className="pattern-weave absolute inset-0" aria-hidden />
+        <div className="absolute -top-24 -right-24 size-[28rem] rounded-full bg-forest-600/60 blur-2xl" aria-hidden />
+        <div className="absolute -bottom-40 left-1/3 size-[26rem] rounded-full bg-terracotta-500/25 blur-3xl" aria-hidden />
+        {/* Rolling hills + sun motif */}
+        <svg viewBox="0 0 800 400" className="absolute right-0 bottom-0 hidden h-full max-h-[460px] w-auto opacity-95 md:block" aria-hidden>
+          <circle cx="560" cy="150" r="78" fill="#D97745" />
+          <circle cx="560" cy="150" r="110" fill="none" stroke="#D97745" strokeOpacity="0.35" strokeWidth="2" strokeDasharray="4 10" />
+          <path d="M120 400 C 260 250, 380 260, 520 320 S 760 300, 800 260 V400Z" fill="#0F3526" />
+          <path d="M260 400 C 420 300, 560 300, 680 350 S 780 360, 800 340 V400Z" fill="#0A2A1D" />
+          <path d="M300 300 C 420 210, 520 220, 620 260" fill="none" stroke="#FAF7F0" strokeOpacity="0.18" strokeWidth="2" />
+          <g fill="#FAF7F0" fillOpacity="0.85">
+            <rect x="640" y="268" width="34" height="26" rx="2" />
+            <path d="M634 270 L657 248 L680 270Z" fill="#B85E2F" fillOpacity="1" />
+            <rect x="700" y="280" width="26" height="20" rx="2" />
+            <path d="M695 282 L713 264 L731 282Z" fill="#B85E2F" fillOpacity="1" />
+          </g>
+        </svg>
+        <div className="relative max-w-2xl px-6 py-14 sm:px-12 sm:py-20 lg:py-28">
+          <p className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold tracking-[0.18em] text-terracotta-200 uppercase ring-1 ring-white/15">
+            Sourced from Indian villages
+          </p>
+          <h1 className="font-display text-[2.5rem] leading-[1.05] font-semibold tracking-tight text-cream sm:text-6xl lg:text-7xl">
+            The taste of home,
+            <br />
+            <span className="text-terracotta-300 italic">delivered</span> to your city.
+          </h1>
+          <p className="mt-6 max-w-lg text-base leading-relaxed text-cream/80 sm:text-lg">
+            {tagline ?? 'Your Village. Your City. Your URU.'} Heirloom spices, farm produce, handloom and craft — straight from the families who make them.
+          </p>
+          <div className="mt-9 flex flex-wrap gap-3">
+            <ButtonLink to="/shop" variant="accent" size="lg">
+              Start shopping <ArrowRight className="size-5" aria-hidden />
+            </ButtonLink>
+            <ButtonLink to="/about" variant="dark-outline" size="lg">
+              Our story
+            </ButtonLink>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function Hero({ banners, loading, tagline }: { banners: Banner[]; loading?: boolean; tagline?: string }) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false); // hover / focus / pause button
   const [holding, setHolding] = useState(false); // touch-and-hold on phones
@@ -37,7 +85,14 @@ export function Hero({ banners }: { banners: Banner[] }) {
     if (index >= count) setIndex(0);
   }, [count, index]);
 
-  if (!count) return null;
+  if (loading) {
+    return (
+      <div className="container-page pt-3 sm:pt-6">
+        <Skeleton className="h-[500px] rounded-[1.75rem] sm:h-[520px] sm:rounded-[2rem]" />
+      </div>
+    );
+  }
+  if (!count) return <BrandHero tagline={tagline} />;
 
   const go = (i: number) => setIndex(((i % count) + count) % count);
 
